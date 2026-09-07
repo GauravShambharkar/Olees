@@ -64,13 +64,19 @@ function ProfileCard({
   const isAnonymous = variant === "anonymous";
   const label = profile?.username ?? "";
   const character = profile?.character ?? "olee2";
+  const isOleeOne = character === "olee1";
+  const cardColors = isOleeOne
+    ? "border-[#ffc4ad] bg-gradient-to-b from-[#fff9f7] via-[#ffb79c] to-[#f04c08]"
+    : "border-[#aad6ff] bg-gradient-to-b from-[#f5faff] via-[#9bcfff] to-[#3a9cf2]";
+  const accentColors = isOleeOne ? "text-[#ff4d4d]" : "text-[#3e9df2]";
+  const radiusColors = isOleeOne ? "border-[#ffc4ad] bg-[#FC906C]" : "border-[#aad6ff] bg-[#43A0F3]";
 
   return (
     <article
-      className={`relative flex min-h-[548px] w-full max-w-[560px] flex-col items-center overflow-visible rounded-[5rem] border-[5px] p-5 sm:min-h-[628px] lg:h-[565px] lg:min-h-0 ${isAnonymous ? "border-[#aad6ff] bg-gradient-to-b from-[#f5faff] via-[#9bcfff] to-[#3a9cf2]" : "border-[#ffc4ad] bg-gradient-to-b from-[#fff9f7] via-[#ffb79c] to-[#f04c08]"}`}
+      className={`relative flex min-h-[548px] w-full max-w-[560px] flex-col items-center overflow-visible rounded-[5rem] border-[5px] p-5 sm:min-h-[628px] lg:h-[565px] lg:min-h-0 ${cardColors}`}
     >
       <h2
-        className={`relative z-10 font-[Georgia,serif] text-[1.6rem] sm:text-[2.1rem] ${isAnonymous ? "text-[#3e9df2]" : "text-[#ff4d4d]"}`}
+        className={`relative z-10 font-[Georgia,serif] text-[1.6rem] sm:text-[2.1rem] ${accentColors}`}
       >
         {isMatching ? "" : label}
       </h2>
@@ -90,12 +96,12 @@ function ProfileCard({
       )}
       {isAnonymous && !isMatching && (
         // inverted radius component
-        <div className="absolute -bottom-1.5 z-999 left-1/2 flex h-[72px] w-fit -translate-x-1/2 items-center justify-between gap-6 rounded-t-[40px] border-[5px] border-b-[5px] border-b-[#FFFFE6] border-[#aad6ff] bg-[#FFFFE6] px-3 pb-0 pt-1">
+        <div className={`absolute -bottom-1.5 z-999 left-1/2 flex h-[72px] w-fit -translate-x-1/2 items-center justify-between gap-6 rounded-t-[40px] border-[5px] border-b-[5px] border-b-[#FFFFE6] bg-[#FFFFE6] px-3 pb-0 pt-1 ${radiusColors}`}>
           <div className="absolute  -left-7 -bottom-1.5 h-7 w-7   border-[#FFFFE6] bg-[#FFFFE6]">
-            <div className="h-[25px] w-7 rounded-br-full border-[5px] border-b-[#aad6ff] border-l-0 border-r-[#aad6ff] border-t-0 bg-[#43A0F3]" />
+            <div className={`h-[25px] w-7 rounded-br-full border-[5px] border-b-0 border-l-0 border-t-0 ${radiusColors}`} />
           </div>
           <div className="absolute -bottom-1.5 -right-7 h-7 w-7 border-[#FFFFE6] bg-[#FFFFE6]">
-            <div className="h-[25px] w-7 rounded-bl-full border-[5px] border-b-[#aad6ff] border-l-[#aad6ff] border-r-0 border-t-0 bg-[#43A0F3]" />
+            <div className={`h-[25px] w-7 rounded-bl-full border-[5px] border-b-0 border-r-0 border-t-0 ${radiusColors}`} />
           </div>
           <button
             type="button"
