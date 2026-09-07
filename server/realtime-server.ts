@@ -11,7 +11,7 @@ type Peer = {
   removed?: boolean;
 };
 
-const port = Number(process.env.REALTIME_PORT ?? 3001);
+const port = Number(process.env.PORT ?? process.env.REALTIME_PORT ?? 3001);
 const waiting: Peer[] = [];
 const peers = new Map<string, Peer>();
 const server = new WebSocketServer({ port });
