@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 
 // Tune these based on testing in your target environment.
-const START_THRESHOLD = 4;    // RMS level to begin "talking"
-const STOP_THRESHOLD = 2.5;   // RMS level to end "talking" (lower = hysteresis, avoids flicker)
+const START_THRESHOLD = 0.02;
+const STOP_THRESHOLD = 0.01;
 const SILENCE_DELAY = 400;    // ms of sustained quiet before flipping back to false
 const SMOOTHING = 0.7;        // manual exponential smoothing factor (0-1, higher = smoother/slower)
 const FFT_SIZE = 2048;
@@ -16,7 +16,7 @@ interface UseMicrophoneActivityResult {
   micError: MicError;
 }
 
-export function useMicrophoneActivity(): UseMicrophoneActivityResult {
+export function useMicrophoneActivity(stream: MediaStream | null): UseMicrophoneActivityResult {
   const [isTalking, setIsTalking] = useState(false);
   const [micError, setMicError] = useState<MicError>(null);
 
@@ -27,38 +27,34 @@ export function useMicrophoneActivity(): UseMicrophoneActivityResult {
   useEffect(() => {
     let frame = 0;
     let context: AudioContext | undefined;
-    let stream: MediaStream | undefined;
     let cancelled = false;
 
     async function monitor() {
       try {
-        const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-        if (cancelled) {
-          mediaStream.getTracks().forEach((track) => track.stop());
-          return;
-        }
-
-        stream = mediaStream;
+        if (!stream) return;
         context = new AudioContext();
+        await context.resume();
         const analyser = context.createAnalyser();
         analyser.fftSize = FFT_SIZE;
 
         const source = context.createMediaStreamSource(stream);
-        const samples = new Uint8Array(analyser.fftSize);
+        const silentOutput = context.createGain();
+        silentOutput.gain.value = 0;
+        const samples = new Float32Array(analyser.fftSize);
         source.connect(analyser);
+        analyser.connect(silentOutput);
+        silentOutput.connect(context.destination);
 
         const check = () => {
           if (cancelled) return;
 
-          analyser.getByteTimeDomainData(samples);
+          analyser.getFloatTimeDomainData(samples);
 
           const rms = Math.sqrt(
-            samples.reduce((sum, sample) => sum + (sample - 128) ** 2, 0) / samples.length
+            samples.reduce((sum, sample) => sum + sample ** 2, 0) / samples.length,
           );
 
-          // analyser.smoothingTimeConstant does NOT affect getByteTimeDomainData,
-          // so we smooth manually to avoid frame-to-frame jitter/flicker.
+          // Smooth the RMS level so brief pauses do not flicker the indicator.
           smoothedLevel.current = smoothedLevel.current * SMOOTHING + rms * (1 - SMOOTHING);
 
           const now = performance.now();
@@ -98,15 +94,14 @@ export function useMicrophoneActivity(): UseMicrophoneActivityResult {
       }
     }
 
-    monitor();
+    if (stream) monitor();
 
     return () => {
       cancelled = true;
       window.cancelAnimationFrame(frame);
-      stream?.getTracks().forEach((track) => track.stop());
       void context?.close();
     };
-  }, []);
+  }, [stream]);
 
   return { isTalking, micError };
 }

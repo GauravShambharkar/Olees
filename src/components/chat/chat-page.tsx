@@ -13,8 +13,9 @@ import { useProfileStore } from "../../store/profile-store";
 export function ChatPage() {
   const profile = useProfileStore((state) => state.profile);
   const hasHydrated = useProfileStore((state) => state.hasHydrated);
-  const { partner, remoteStream, isMatching } = useRandomMatch(profile);
-  const { isTalking } = useMicrophoneActivity();
+  const { partner, localStream, remoteStream, isMatching } = useRandomMatch(profile);
+  const { isTalking } = useMicrophoneActivity(localStream);
+  const { isTalking: isPartnerTalking } = useMicrophoneActivity(remoteStream);
   const remoteAudioRef = useRemoteAudio(remoteStream);
   const [mounted, setMounted] = useState(false);
 
@@ -48,7 +49,7 @@ export function ChatPage() {
         <ProfileCard
           profile={partner}
           variant="anonymous"
-          isTalking={false}
+          isTalking={isPartnerTalking}
           isMatching={isMatching}
         />
       </section>
@@ -96,7 +97,7 @@ function ProfileCard({
       />
       {isTalking && !isMatching && (
         <BsSoundwave
-          className={`mb-20 mt-4 h-14 w-14 shrink-0 ease-in-out duration-300 transition-all rounded-full bg-white/40 p-2.5 text-white shadow-sm ${character === "olee1" ? "bg-linear-to-tr from-[#FFEEE8] to-[#FC906C]" : "bg-linear-to-tr from-[#d0eaff] to-[#3A9CF2]"}`}
+          className={`mb-10 h-14 w-14 shrink-0 ease-in-out duration-300 transition-all rounded-full bg-white/40 p-2.5 text-white shadow-sm ${character === "olee1" ? "bg-linear-to-tr from-[#FFEEE8] to-[#FC906C]" : "bg-linear-to-tr from-[#d0eaff] to-[#3A9CF2]"}`}
           aria-label="Audio activity"
         />
       )}

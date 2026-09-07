@@ -3,9 +3,11 @@
 import Image from "next/image";
 import { FiArrowRight } from "react-icons/fi";
 import { useProfilePicker } from "../../hooks/use-profile-picker";
+import { useMicrophonePermission } from "../../hooks/use-microphone-permission";
 
 export function ProfilePicker() {
   const { username, setUsername, character, setCharacter, isSubmitting, error, submitProfile } = useProfilePicker();
+  const { isReady: microphoneReady, error: microphoneError } = useMicrophonePermission();
 
   return (
     <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden  px-5 py-10">
@@ -51,7 +53,7 @@ export function ProfilePicker() {
             <button
               type="button"
               onClick={submitProfile}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !microphoneReady}
               aria-label="Continue with this name"
               className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#ff4343] text-2xl font-bold text-white shadow-md transition-transform hover:scale-105 disabled:opacity-70"
             >
@@ -62,6 +64,11 @@ export function ProfilePicker() {
         {error && (
           <p className="mt-3 text-center text-sm font-semibold text-[#c33a3a]">
             {error}
+          </p>
+        )}
+        {microphoneError && (
+          <p className="mt-3 text-center text-sm font-semibold text-[#c33a3a]">
+            {microphoneError}
           </p>
         )}
       </section>
