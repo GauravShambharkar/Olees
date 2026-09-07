@@ -5,7 +5,8 @@ export type SignalMessage =
   | { type: "offer"; offer: RTCSessionDescriptionInit }
   | { type: "answer"; answer: RTCSessionDescriptionInit }
   | { type: "ice-candidate"; candidate: RTCIceCandidateInit }
-  | { type: "ended" };
+  | { type: "ended" }
+  | { type: "next" };
 
 export class SignalingClient {
   private socket: WebSocket | null = null;

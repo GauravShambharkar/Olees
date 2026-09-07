@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AudioPeer } from "../lib/realtime/audio-peer";
 import { SignalingClient, type SignalMessage } from "../lib/realtime/signaling-client";
 import type { Character } from "../store/slices/profile-slice";
@@ -12,6 +12,8 @@ export function useRandomMatch(profile: MatchedProfile | null) {
   const [partner, setPartner] = useState<MatchedProfile | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const [isRequestingNext, setIsRequestingNext] = useState(false);
+  const requestNextRef = useRef<(() => void) | null>(null);
   const username = profile?.username;
   const character = profile?.character;
 
@@ -25,6 +27,15 @@ export function useRandomMatch(profile: MatchedProfile | null) {
     let cancelled = false;
     const pendingSignals: SignalMessage[] = [];
     const realtimeUrl = process.env.NEXT_PUBLIC_REALTIME_URL ?? "ws://localhost:3001";
+    requestNextRef.current = () => {
+      peer?.close();
+      peer = undefined;
+      pendingSignals.length = 0;
+      setPartner(null);
+      setRemoteStream(null);
+      setIsRequestingNext(true);
+      signaling.send({ type: "next" });
+    };
     requestMicrophone()
       .then((stream) => {
         if (cancelled) return;
@@ -40,6 +51,7 @@ export function useRandomMatch(profile: MatchedProfile | null) {
           if (cancelled) return;
           if (message.type === "matched") {
             peer?.close();
+            setIsRequestingNext(false);
             setPartner(message.profile);
             if (!microphone) {
               microphone = await requestMicrophone().catch(() => undefined);
@@ -78,8 +90,14 @@ export function useRandomMatch(profile: MatchedProfile | null) {
       cancelled = true;
       peer?.close();
       signaling.close();
+      requestNextRef.current = null;
     };
   }, [username, character]);
 
-  return { partner, localStream, remoteStream, isMatching: partner === null };
+  function requestNext() {
+    if (isRequestingNext) return;
+    requestNextRef.current?.();
+  }
+
+  return { partner, localStream, remoteStream, isMatching: partner === null, isRequestingNext, requestNext };
 }

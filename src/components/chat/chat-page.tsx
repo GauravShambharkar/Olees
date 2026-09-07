@@ -13,7 +13,7 @@ import { useProfileStore } from "../../store/profile-store";
 export function ChatPage() {
   const profile = useProfileStore((state) => state.profile);
   const hasHydrated = useProfileStore((state) => state.hasHydrated);
-  const { partner, localStream, remoteStream, isMatching } = useRandomMatch(profile);
+  const { partner, localStream, remoteStream, isMatching, isRequestingNext, requestNext } = useRandomMatch(profile);
   const { isTalking } = useMicrophoneActivity(localStream);
   const { isTalking: isPartnerTalking } = useMicrophoneActivity(remoteStream);
   const remoteAudioRef = useRemoteAudio(remoteStream);
@@ -53,6 +53,8 @@ export function ChatPage() {
           isTalking={isPartnerTalking}
           isMatching={isMatching}
           order="partner"
+          onNext={requestNext}
+          isNextLoading={isRequestingNext}
         />
       </section>
     </main>
@@ -65,12 +67,16 @@ function ProfileCard({
   isTalking,
   isMatching = false,
   order,
+  onNext,
+  isNextLoading,
 }: {
   profile: { username: string; character: "olee1" | "olee2" } | null;
   variant: "you" | "anonymous";
   isTalking: boolean;
   isMatching?: boolean;
   order: "user" | "partner";
+  onNext?: () => void;
+  isNextLoading?: boolean;
 }) {
   const isAnonymous = variant === "anonymous";
   const label = profile?.username ?? "";
@@ -101,13 +107,13 @@ function ProfileCard({
       />
       {isTalking && !isMatching && (
         <BsSoundwave
-          className={`mb-10 max-[700px]:mt-2 border h-10 w-10 shrink-0 rounded-full bg-white/80 p-2 text-white shadow-sm transition-all duration-300 ease-in-out sm:h-14 sm:w-14 sm:p-2.5 ${character === "olee1" ? "bg-linear-to-tr from-[#ff5720] to-[#FFEEE8]" : "bg-linear-to-tr from-[#d0eaff] to-[#2197ff]"}`}
+          className={`mb-10 max-[700px]:mt-2 border border-[#f7f7f7] h-10 w-10 shrink-0 rounded-full bg-white/80 p-2 text-white shadow-sm transition-all duration-300 ease-in-out sm:h-14 sm:w-14 sm:p-2.5 ${character === "olee1" ? "bg-linear-to-tr from-[#ff5720] to-[#ffc3ad]" : "bg-linear-to-tr from-[#d0eaff] to-[#2197ff]"}`}
           aria-label="Audio activity"
         />
       )}
       {isAnonymous && !isMatching && (
         // inverted radius component
-        <div className={`absolute -bottom-1.5 z-999 left-1/2 flex max-[700px]:h-[50px] h-[72px] w-fit -translate-x-1/2 items-start justify-between gap-6 rounded-t-[30px] border-[5px] border-b-[5px] border-b-[#FFFFE6] bg-[#FFFFE6] px-3 max-[700px]:px-1 pb-0 pt-1 ${radiusColors}`}>
+        <div className={`absolute -bottom-1.5 z-999 left-1/2 flex max-[700px]:h-[50px] h-[72px] w-fit -translate-x-1/2 items-start justify-between gap-6 rounded-t-[30px] border-[5px] border-b-[5px] border-b-[#FFFFE6] bg-[#FFFFE6] px-1.5 max-[700px]:px-1 pb-0 pt-1 ${radiusColors}`}>
           <div className="absolute  -left-7 -bottom-1.5 h-7 w-7   border-[#FFFFE6] bg-[#FFFFE6]">
             <div className={`h-[25px] w-7 rounded-br-full border-[5px] border-b-5 border-l-0 border-t-0 ${radiusColors}`} />
           </div>
@@ -117,16 +123,22 @@ function ProfileCard({
           <button
             type="button"
             aria-label="Like this user"
-            className="relative z-10 flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#555] to-[#111] text-white shadow-lg transition-transform hover:scale-105 sm:h-[54px] sm:w-[54px]"
+            className="relative cursor-not-allowed z-10 flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#555] to-[#111] text-white shadow-lg transition-transform hover:scale-105 sm:h-[54px] sm:w-[54px]"
           >
             <FiHeart className="h-5 w-5 sm:h-6 sm:w-6" />
           </button>
           <button
             type="button"
             aria-label="Next user"
+            onClick={onNext}
+            disabled={isNextLoading}
             className="relative z-10 flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#555] to-[#111] text-white shadow-lg transition-transform hover:scale-105 sm:h-[54px] sm:w-[54px]"
           >
-            <FiArrowRight className="h-5 w-5 sm:h-6 sm:w-6" />
+            {isNextLoading ? (
+              <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/35 border-t-white sm:h-6 sm:w-6" />
+            ) : (
+              <FiArrowRight className="h-5 w-5 sm:h-6 sm:w-6" />
+            )}
           </button>
         </div>
       )}

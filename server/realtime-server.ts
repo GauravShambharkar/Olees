@@ -69,6 +69,20 @@ function match(peer: Peer) {
   });
 }
 
+function rematch(peer: Peer) {
+  const partner = peer.partnerId ? peers.get(peer.partnerId) : undefined;
+
+  if (partner) {
+    partner.partnerId = undefined;
+    send(partner, { type: "ended" });
+    enqueue(partner);
+  }
+
+  peer.partnerId = undefined;
+  enqueue(peer);
+  match(peer);
+}
+
 server.on("connection", (socket, request) => {
   const query = new URL(request.url ?? "/", `http://${request.headers.host ?? "localhost"}`).searchParams;
   const username = query.get("username")?.trim();
@@ -89,6 +103,10 @@ server.on("connection", (socket, request) => {
 
     try {
       const message = JSON.parse(raw.toString()) as { type?: string };
+      if (message.type === "next") {
+        rematch(peer);
+        return;
+      }
       if (["offer", "answer", "ice-candidate"].includes(message.type ?? "")) send(partner, message);
     } catch {
       send(peer, { type: "error", message: "Invalid signaling message" });
