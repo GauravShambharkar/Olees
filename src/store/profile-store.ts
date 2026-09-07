@@ -6,5 +6,6 @@ export const useProfileStore = create<ProfileSlice>()(
   persist(createProfileSlice, {
     name: "profile-storage",
     storage: createJSONStorage(() => localStorage),
+    onRehydrateStorage: () => (state) => state?.setHasHydrated(true),
   }),
 );

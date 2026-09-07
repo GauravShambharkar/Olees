@@ -1,4 +1,5 @@
 export class AudioPeer {
+  onRemoteStream?: (stream: MediaStream) => void;
   private connection: RTCPeerConnection;
 
   constructor(private readonly onSignal: (message: { type: "offer" | "answer" | "ice-candidate"; [key: string]: unknown }) => void) {
@@ -8,6 +9,7 @@ export class AudioPeer {
     this.connection.addEventListener("icecandidate", (event) => {
       if (event.candidate) this.onSignal({ type: "ice-candidate", candidate: event.candidate.toJSON() });
     });
+    this.connection.addEventListener("track", (event) => this.onRemoteStream?.(event.streams[0]));
   }
 
   async addMicrophone(stream: MediaStream) {

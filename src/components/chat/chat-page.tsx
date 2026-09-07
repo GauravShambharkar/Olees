@@ -5,12 +5,17 @@ import { useEffect, useState } from "react";
 import { FiArrowRight, FiHeart } from "react-icons/fi";
 import { BsSoundwave } from "react-icons/bs";
 
+import { useMicrophoneActivity } from "../../hooks/use-microphone-activity";
+import { useRemoteAudio } from "../../hooks/use-remote-audio";
 import { useRandomMatch } from "../../hooks/use-random-match";
 import { useProfileStore } from "../../store/profile-store";
 
 export function ChatPage() {
   const profile = useProfileStore((state) => state.profile);
-  const { partner, isMatching } = useRandomMatch();
+  const hasHydrated = useProfileStore((state) => state.hasHydrated);
+  const { partner, remoteStream, isMatching } = useRandomMatch(profile);
+  const { isTalking } = useMicrophoneActivity();
+  const remoteAudioRef = useRemoteAudio(remoteStream);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -18,7 +23,7 @@ export function ChatPage() {
     return () => window.cancelAnimationFrame(frame);
   }, []);
 
-  if (!mounted) {
+  if (!mounted || !hasHydrated) {
     return <main className="min-h-screen bg-[#ffffe6]" aria-busy="true" />;
   }
 
@@ -27,6 +32,7 @@ export function ChatPage() {
 
   return (
     <main className="min-h-screen bg-[#ffffe6] px-4 py-6 sm:px-8 lg:px-[6.3vw] lg:py-7">
+      <audio ref={remoteAudioRef} autoPlay aria-label="Matched partner audio" />
       {/* <header className="text-center">
         <h1 className="font-[Georgia,serif] text-2xl font-bold tracking-[-0.06em] text-[#ff1010] sm:text-[2rem]">
           Olees
@@ -37,7 +43,7 @@ export function ChatPage() {
         <ProfileCard
           profile={{ username, character }}
           variant="you"
-          isTalking
+          isTalking={isTalking}
         />
         <ProfileCard
           profile={partner}
@@ -69,7 +75,7 @@ function ProfileCard({
     ? "border-[#ffc4ad] bg-gradient-to-b from-[#fff9f7] via-[#ffb79c] to-[#f04c08]"
     : "border-[#aad6ff] bg-gradient-to-b from-[#f5faff] via-[#9bcfff] to-[#3a9cf2]";
   const accentColors = isOleeOne ? "text-[#ff4d4d]" : "text-[#3e9df2]";
-  const radiusColors = isOleeOne ? "border-[#ffc4ad] bg-[#FC906C]" : "border-[#aad6ff] bg-[#43A0F3]";
+  const radiusColors = isOleeOne ? "border-[#ffc4ad] bg-[#F15218]" : "border-[#aad6ff] bg-[#43A0F3]";
 
   return (
     <article
@@ -86,11 +92,11 @@ function ProfileCard({
         width={430}
         height={430}
         priority
-        className={`mt-10 h-[218px] w-[218px] object-contain sm:mt-14 sm:h-[298px] sm:w-[298px] ${isMatching ? " sm:h-[400px] sm:w-[400px]:w" : ""}`}
+        className={`mt-10 h-[218px] w-[218px] object-contain sm:mt-14 sm:h-[298px] sm:w-[298px] ${isMatching ? "sm:h-[400px] sm:w-[400px]" : ""}`}
       />
       {isTalking && !isMatching && (
         <BsSoundwave
-          className={`mb-20 mt-4 h-14 w-14 shrink-0 rounded-full bg-white/40 p-2.5 text-white shadow-sm ${character === "olee1" ? "bg-linear-to-tr from-[#FFEEE8] to-[#FC906C]" : "bg-linear-to-tr from-[#d0eaff] to-[#3A9CF2]"}`}
+          className={`mb-20 mt-4 h-14 w-14 shrink-0 ease-in-out duration-300 transition-all rounded-full bg-white/40 p-2.5 text-white shadow-sm ${character === "olee1" ? "bg-linear-to-tr from-[#FFEEE8] to-[#FC906C]" : "bg-linear-to-tr from-[#d0eaff] to-[#3A9CF2]"}`}
           aria-label="Audio activity"
         />
       )}
@@ -98,10 +104,10 @@ function ProfileCard({
         // inverted radius component
         <div className={`absolute -bottom-1.5 z-999 left-1/2 flex h-[72px] w-fit -translate-x-1/2 items-center justify-between gap-6 rounded-t-[40px] border-[5px] border-b-[5px] border-b-[#FFFFE6] bg-[#FFFFE6] px-3 pb-0 pt-1 ${radiusColors}`}>
           <div className="absolute  -left-7 -bottom-1.5 h-7 w-7   border-[#FFFFE6] bg-[#FFFFE6]">
-            <div className={`h-[25px] w-7 rounded-br-full border-[5px] border-b-0 border-l-0 border-t-0 ${radiusColors}`} />
+            <div className={`h-[25px] w-7 rounded-br-full border-[5px] border-b-5 border-l-0 border-t-0 ${radiusColors}`} />
           </div>
           <div className="absolute -bottom-1.5 -right-7 h-7 w-7 border-[#FFFFE6] bg-[#FFFFE6]">
-            <div className={`h-[25px] w-7 rounded-bl-full border-[5px] border-b-0 border-r-0 border-t-0 ${radiusColors}`} />
+            <div className={`h-[25px] w-7 rounded-bl-full border-[5px] border-b-5 border-r-0 border-t-0 ${radiusColors}`} />
           </div>
           <button
             type="button"
