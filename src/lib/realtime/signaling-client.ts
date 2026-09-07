@@ -1,7 +1,7 @@
 export type Character = "olee1" | "olee2";
 
 export type SignalMessage =
-  | { type: "matched"; peerId: string; initiator: boolean; profile: { username: string; character: Character } }
+  | { type: "matched"; peerId: string; initiator: boolean; profile: { username: string; character: Character }; iceServers?: RTCIceServer[] }
   | { type: "offer"; offer: RTCSessionDescriptionInit }
   | { type: "answer"; answer: RTCSessionDescriptionInit }
   | { type: "ice-candidate"; candidate: RTCIceCandidateInit }

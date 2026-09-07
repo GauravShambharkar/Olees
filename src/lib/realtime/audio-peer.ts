@@ -1,11 +1,16 @@
+import { getIceServers } from "./ice-servers";
+
 export class AudioPeer {
   onRemoteStream?: (stream: MediaStream) => void;
   private connection: RTCPeerConnection;
   private pendingCandidates: RTCIceCandidateInit[] = [];
 
-  constructor(private readonly onSignal: (message: { type: "offer" | "answer" | "ice-candidate"; [key: string]: unknown }) => void) {
+  constructor(
+    private readonly onSignal: (message: { type: "offer" | "answer" | "ice-candidate"; [key: string]: unknown }) => void,
+    iceServers?: RTCIceServer[],
+  ) {
     this.connection = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+      iceServers: iceServers ?? getIceServers(),
     });
     this.connection.addEventListener("icecandidate", (event) => {
       if (event.candidate) this.onSignal({ type: "ice-candidate", candidate: event.candidate.toJSON() });

@@ -57,7 +57,7 @@ export function useRandomMatch(profile: MatchedProfile | null) {
               microphone = await requestMicrophone().catch(() => undefined);
             }
             setLocalStream(microphone ?? null);
-            peer = new AudioPeer((signal) => signaling.send(signal as SignalMessage));
+            peer = new AudioPeer((signal) => signaling.send(signal as SignalMessage), message.iceServers);
             peer.onRemoteStream = setRemoteStream;
             if (microphone) await peer.addMicrophone(microphone);
             else peer.receiveAudioOnly();
