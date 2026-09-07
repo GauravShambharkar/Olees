@@ -48,6 +48,7 @@ export function useRandomMatch(profile: MatchedProfile | null) {
             peer = new AudioPeer((signal) => signaling.send(signal as SignalMessage));
             peer.onRemoteStream = setRemoteStream;
             if (microphone) await peer.addMicrophone(microphone);
+            else peer.receiveAudioOnly();
             for (const pendingSignal of pendingSignals.splice(0)) {
               if (pendingSignal.type === "offer") await peer.acceptOffer(pendingSignal.offer);
               if (pendingSignal.type === "answer") await peer.addAnswer(pendingSignal.answer);

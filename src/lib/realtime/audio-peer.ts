@@ -17,6 +17,10 @@ export class AudioPeer {
     stream.getTracks().forEach((track) => this.connection.addTrack(track, stream));
   }
 
+  receiveAudioOnly() {
+    this.connection.addTransceiver("audio", { direction: "recvonly" });
+  }
+
   async createOffer() {
     const offer = await this.connection.createOffer();
     await this.connection.setLocalDescription(offer);

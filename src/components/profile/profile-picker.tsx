@@ -7,7 +7,7 @@ import { useMicrophonePermission } from "../../hooks/use-microphone-permission";
 
 export function ProfilePicker() {
   const { username, setUsername, character, setCharacter, isSubmitting, error, submitProfile } = useProfilePicker();
-  const { isReady: microphoneReady, error: microphoneError } = useMicrophonePermission();
+  const { error: microphoneError } = useMicrophonePermission();
 
   return (
     <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden  px-5 py-10">
@@ -53,7 +53,7 @@ export function ProfilePicker() {
             <button
               type="button"
               onClick={submitProfile}
-              disabled={isSubmitting || !microphoneReady}
+              disabled={isSubmitting}
               aria-label="Continue with this name"
               className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#ff4343] text-2xl font-bold text-white shadow-md transition-transform hover:scale-105 disabled:opacity-70"
             >

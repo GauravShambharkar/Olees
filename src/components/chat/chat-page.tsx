@@ -32,7 +32,7 @@ export function ChatPage() {
   const username = profile?.username ?? "You";
 
   return (
-    <main className="min-h-screen bg-[#ffffe6] px-4 py-6 sm:px-8 lg:px-[6.3vw] lg:py-7">
+    <main className="min-h-screen overflow-x-hidden bg-[#ffffe6] px-3 py-4 sm:px-8 lg:px-[6.3vw] lg:py-7">
       <audio ref={remoteAudioRef} autoPlay aria-label="Matched partner audio" />
       {/* <header className="text-center">
         <h1 className="font-[Georgia,serif] text-2xl font-bold tracking-[-0.06em] text-[#ff1010] sm:text-[2rem]">
@@ -40,17 +40,19 @@ export function ChatPage() {
         </h1>
       </header> */}
 
-      <section className="mx-auto mt-10 grid w-full max-w-[1260px] grid-cols-1 items-center justify-items-center gap-6 lg:mt-12 lg:grid-cols-2 lg:gap-[7vw]">
+      <section className="mx-auto mt-6 grid w-full max-w-[1260px] grid-cols-1 items-center justify-items-center gap-5 lg:mt-12 lg:grid-cols-2 lg:gap-[7vw]">
         <ProfileCard
           profile={{ username, character }}
           variant="you"
           isTalking={isTalking}
+          order="user"
         />
         <ProfileCard
           profile={partner}
           variant="anonymous"
           isTalking={isPartnerTalking}
           isMatching={isMatching}
+          order="partner"
         />
       </section>
     </main>
@@ -62,11 +64,13 @@ function ProfileCard({
   variant,
   isTalking,
   isMatching = false,
+  order,
 }: {
   profile: { username: string; character: "olee1" | "olee2" } | null;
   variant: "you" | "anonymous";
   isTalking: boolean;
   isMatching?: boolean;
+  order: "user" | "partner";
 }) {
   const isAnonymous = variant === "anonymous";
   const label = profile?.username ?? "";
@@ -80,7 +84,7 @@ function ProfileCard({
 
   return (
     <article
-      className={`relative flex min-h-[548px] w-full max-w-[560px] flex-col items-center overflow-visible rounded-[5rem] border-[5px] p-5 sm:min-h-[628px] lg:h-[565px] lg:min-h-0 ${cardColors}`}
+      className={`relative flex h-[323px] min-h-0 w-[323px] max-w-[323px] flex-col items-center overflow-visible rounded-[3.5rem] border-[5px] p-4 sm:h-[628px] sm:min-h-0 sm:w-full sm:max-w-[560px] sm:rounded-[5rem] sm:p-5 lg:h-[565px] ${order === "partner" ? "order-first lg:order-none" : "order-last lg:order-none"} ${cardColors}`}
     >
       <h2
         className={`relative z-10 font-[Georgia,serif] text-[1.6rem] sm:text-[2.1rem] ${accentColors}`}
@@ -93,17 +97,17 @@ function ProfileCard({
         width={430}
         height={430}
         priority
-        className={`mt-10 h-[218px] w-[218px] object-contain sm:mt-14 sm:h-[298px] sm:w-[298px] ${isMatching ? "sm:h-[400px] sm:w-[400px]" : ""}`}
+        className={` h-[151px] w-[127px] object-contain sm:mt-14 sm:h-[298px] sm:w-[298px] ${isMatching ? "h-[151px] w-[127px] sm:h-[400px] sm:w-[400px]" : ""}`}
       />
       {isTalking && !isMatching && (
         <BsSoundwave
-          className={`mb-10 h-14 w-14 shrink-0 ease-in-out duration-300 transition-all rounded-full bg-white/40 p-2.5 text-white shadow-sm ${character === "olee1" ? "bg-linear-to-tr from-[#FFEEE8] to-[#FC906C]" : "bg-linear-to-tr from-[#d0eaff] to-[#3A9CF2]"}`}
+          className={`mb-10 max-[700px]:mt-2 border h-10 w-10 shrink-0 rounded-full bg-white/80 p-2 text-white shadow-sm transition-all duration-300 ease-in-out sm:h-14 sm:w-14 sm:p-2.5 ${character === "olee1" ? "bg-linear-to-tr from-[#ff5720] to-[#FFEEE8]" : "bg-linear-to-tr from-[#d0eaff] to-[#2197ff]"}`}
           aria-label="Audio activity"
         />
       )}
       {isAnonymous && !isMatching && (
         // inverted radius component
-        <div className={`absolute -bottom-1.5 z-999 left-1/2 flex h-[72px] w-fit -translate-x-1/2 items-center justify-between gap-6 rounded-t-[40px] border-[5px] border-b-[5px] border-b-[#FFFFE6] bg-[#FFFFE6] px-3 pb-0 pt-1 ${radiusColors}`}>
+        <div className={`absolute -bottom-1.5 z-999 left-1/2 flex max-[700px]:h-[50px] h-[72px] w-fit -translate-x-1/2 items-start justify-between gap-6 rounded-t-[30px] border-[5px] border-b-[5px] border-b-[#FFFFE6] bg-[#FFFFE6] px-3 max-[700px]:px-1 pb-0 pt-1 ${radiusColors}`}>
           <div className="absolute  -left-7 -bottom-1.5 h-7 w-7   border-[#FFFFE6] bg-[#FFFFE6]">
             <div className={`h-[25px] w-7 rounded-br-full border-[5px] border-b-5 border-l-0 border-t-0 ${radiusColors}`} />
           </div>
@@ -113,16 +117,16 @@ function ProfileCard({
           <button
             type="button"
             aria-label="Like this user"
-            className="relative z-10 flex h-[54px] w-[54px] items-center justify-center rounded-full bg-gradient-to-br from-[#555] to-[#111] text-white shadow-lg transition-transform hover:scale-105"
+            className="relative z-10 flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#555] to-[#111] text-white shadow-lg transition-transform hover:scale-105 sm:h-[54px] sm:w-[54px]"
           >
-            <FiHeart className="h-6 w-6" />
+            <FiHeart className="h-5 w-5 sm:h-6 sm:w-6" />
           </button>
           <button
             type="button"
             aria-label="Next user"
-            className="relative z-10 flex h-[54px] w-[54px] items-center justify-center rounded-full bg-gradient-to-br from-[#555] to-[#111] text-white shadow-lg transition-transform hover:scale-105"
+            className="relative z-10 flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#555] to-[#111] text-white shadow-lg transition-transform hover:scale-105 sm:h-[54px] sm:w-[54px]"
           >
-            <FiArrowRight className="h-6 w-6" />
+            <FiArrowRight className="h-5 w-5 sm:h-6 sm:w-6" />
           </button>
         </div>
       )}
