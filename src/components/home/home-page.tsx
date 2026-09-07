@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { ProfilePicker } from "../profile/profile-picker";
 
 function SoundMark() {
   return (
@@ -17,12 +18,9 @@ function SoundMark() {
 
 export function HomePage() {
   const [isStarting, setIsStarting] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
-  function handleStart() {
-    if (isStarting) return;
-    setIsStarting(true);
-    window.setTimeout(() => setIsStarting(false), 1500);
-  }
+  if (showProfile) return <ProfilePicker />;
 
   return (
     <main className="relative isolate flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#ffffe6] px-6 py-12">
@@ -40,7 +38,13 @@ export function HomePage() {
 
         <button
           type="button"
-          onClick={handleStart}
+          onClick={() => {
+            setIsStarting(true);
+            window.setTimeout(() => {
+              setIsStarting(false);
+              setShowProfile(true);
+            }, 1500);
+          }}
           disabled={isStarting}
           className="group flex min-h-20 cursor-pointer items-center gap-5 rounded-[2.7rem] border-4 border-[#c33a3a] bg-gradient-to-r from-[#ff1010] to-[#e20000] px-8 text-white shadow-[0_7px_15px_rgba(0,0,0,0.22),inset_-4px_-5px_0_rgba(255,255,255,0.19)] transition-transform hover:scale-[1.03] focus:outline-none focus:ring-4 focus:ring-[#ff1010]/25 active:scale-[0.98] disabled:cursor-wait disabled:opacity-80 sm:px-9"
         >
